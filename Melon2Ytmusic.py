@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import scrolledtext
+from tkinter import scrolledtext, messagebox
 from threading import Thread
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -7,8 +7,25 @@ from bs4 import BeautifulSoup
 from ytmusicapi import YTMusic
 import time
 from datetime import datetime
+import os
+import subprocess
+
+def authenticate_ytmusic():
+    script_dir = os.path.dirname(os.path.abspath(__file__))  # Melon2Ytmusic.py 파일이 위치한 폴더
+    os.chdir(script_dir)  # 작업 디렉토리 변경
+
+    # OAuth 인증 명령 실행
+    try:
+        subprocess.Popen(["ytmusicapi", "oauth"])
+        messagebox.showinfo("Info", "브라우저에서 OAuth 인증 절차를 완료해 주세요.")
+    except Exception as e:
+        messagebox.showerror("Error", f"OAuth 인증 중 오류가 발생했습니다: {e}")
 
 def crawl_and_create_playlist():
+    if not os.path.exists('oauth.json'):
+        messagebox.showwarning("Warning", "OAuth 파일이 없습니다. 터미널에서 'ytmusicapi oauth'를 실행해 주세요.")
+        return
+
     # 크롬 드라이버 설정
     driver_path = "C:\\Temp\\chromedriver.exe"
     service = Service(driver_path)
@@ -36,7 +53,7 @@ def crawl_and_create_playlist():
 
     # 오늘 날짜를 포함한 플레이리스트 이름 생성
     today = datetime.now().strftime("%Y-%m-%d")
-    playlist_name = f"Melon Top Chart - {today}"
+    playlist_name = f"맬론 Top100 - {today}"
 
     # 플레이리스트 생성
     playlist_id = ytmusic.create_playlist(playlist_name, "Melon chart top songs")
@@ -61,7 +78,11 @@ def start_crawling():
 
 # Tkinter UI 생성
 root = tk.Tk()
-root.title("Music Playlist Creator")
+root.title("Melon2Ytmusic")
+
+# OAuth 인증 버튼
+oauth_button = tk.Button(root, text="OAuth 인증", command=authenticate_ytmusic)
+oauth_button.pack()
 
 # 시작 버튼
 start_button = tk.Button(root, text="Start Crawling", command=start_crawling)
