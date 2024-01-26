@@ -2,6 +2,8 @@
 
 ## 프로젝트 개요
 
+![image](https://github.com/maskelog/melon-chart-to-ytmusic/assets/30742914/280a7f7a-154e-4ac2-8ce4-2929eaf26e04)
+
 Melon2Ytmusic은 멜론 차트와 빌보드 Hot 100 차트에서 음악을 크롤링하여 YouTube Music 플레이리스트에 자동으로 추가하는 파이썬 스크립트입니다. 이 프로그램은 GUI 인터페이스를 통해 사용자가 편리하게 음악 차트의 최신 곡들을 YouTube Music 플레이리스트에 추가할 수 있도록 도와줍니다.
 
 ## 주요 기능
