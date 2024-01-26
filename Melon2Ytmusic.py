@@ -15,6 +15,11 @@ def authenticate_ytmusic():
     script_dir = os.path.dirname(os.path.abspath(__file__))  # 스크립트가 위치한 폴더
     os.chdir(script_dir)  # 작업 디렉토리 변경
 
+    # oauth.json 파일이 이미 존재하는지 확인
+    if os.path.exists('oauth.json'):
+        messagebox.showinfo("Info", "OAuth 인증이 이미 완료되었습니다.")
+        return
+
     # OAuth 인증 명령 실행
     try:
         subprocess.Popen(["ytmusicapi", "oauth"])
