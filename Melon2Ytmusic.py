@@ -11,21 +11,30 @@ import os
 import subprocess
 import requests
 
+def update_oauth_status():
+    # OAuth 상태를 UI에 표시하는 함수
+    if os.path.exists('oauth.json'):
+        oauth_status_label.config(text="OAuth Status: Authenticated", fg="green")
+    else:
+        oauth_status_label.config(text="OAuth Status: Not Authenticated", fg="red")
+
 def authenticate_ytmusic():
     script_dir = os.path.dirname(os.path.abspath(__file__))  # 스크립트가 위치한 폴더
     os.chdir(script_dir)  # 작업 디렉토리 변경
 
-    # oauth.json 파일이 이미 존재하는지 확인
-    if os.path.exists('oauth.json'):
-        messagebox.showinfo("Info", "OAuth 인증이 이미 완료되었습니다.")
-        return
+    # oauth.json 파일이 존재하지 않을 때만 인증 프로세스 진행
+    if not os.path.exists('oauth.json'):
+        # OAuth 인증 명령 실행
+        try:
+            subprocess.Popen(["ytmusicapi", "oauth"])
+        except Exception as e:
+            messagebox.showerror("Error", f"OAuth 인증 중 오류가 발생했습니다: {e}")
+    update_oauth_status()
 
-    # OAuth 인증 명령 실행
-    try:
-        subprocess.Popen(["ytmusicapi", "oauth"])
-        messagebox.showinfo("Info", "브라우저에서 인증 후, 터미널에서 Enter 키를 눌러 인증을 완료해주세요.")
-    except Exception as e:
-        messagebox.showerror("Error", f"OAuth 인증 중 오류가 발생했습니다: {e}")
+def auto_authenticate_ytmusic():
+    # 프로그램 시작 시 oauth.json 파일의 존재 여부를 확인하고 상태를 업데이트하는 함수
+    update_oauth_status() 
+
 
 def crawl_melon():
     if not os.path.exists('oauth.json'):
@@ -138,9 +147,17 @@ def start_crawling_billboard():
 root = tk.Tk()
 root.title("Music Chart to YouTube Music")
 
-# OAuth 인증 버튼
-oauth_button = tk.Button(root, text="OAuth 인증", command=authenticate_ytmusic)
-oauth_button.pack()
+# OAuth 인증 버튼 및 상태 레이블
+oauth_frame = tk.Frame(root)
+oauth_frame.pack()
+
+oauth_button = tk.Button(oauth_frame, text="OAuth 인증", command=authenticate_ytmusic)
+oauth_button.pack(side=tk.LEFT)
+
+oauth_status_label = tk.Label(oauth_frame, text="OAuth Status: Checking...", fg="black")
+oauth_status_label.pack(side=tk.LEFT)
+
+root.after(10, auto_authenticate_ytmusic)
 
 # 멜론 크롤링 시작 버튼
 start_melon_button = tk.Button(root, text="Start Crawling Melon", command=start_crawling_melon)
